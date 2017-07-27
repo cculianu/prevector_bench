@@ -46,8 +46,8 @@ struct Log : public std::ostringstream
     Log() : std::ostringstream() {}
     Log(const std::string &s) : std::ostringstream() { (*this) << s; }
     ~Log() {
-        std::string s(str());
         flush();
+        std::string s(str());
         mut.lock();
         std::cout << s;
         std::cout.flush();
