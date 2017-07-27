@@ -17,7 +17,7 @@ endif
 all: $(EXE)
 
 $(EXE): main.cpp prevector.h
-	$(CXX) -o $(EXE) -O2 -std=c++11 -D$(OS) -DNDEBUG main.cpp
+	$(CXX) -o $(EXE) -O3 -fomit-frame-pointer -std=c++11 -D$(OS) -DNDEBUG main.cpp
 
 clean:
 	rm -f $(EXE)
