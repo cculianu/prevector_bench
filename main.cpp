@@ -204,12 +204,10 @@ int main(void)
         Log() << "Running " << funcs.size() << " tests" << std::endl;
 
     for (int i = 0; i < nthreads; ++i) {
-        threads.emplace_back([i,&funcs,nthreads,&fctr]{
-            //Log() << "Thread " << i << " started " << std::endl;
+        threads.emplace_back([&funcs,&fctr]{
             int fidx;
-            while ((fidx = fctr++) < (int)funcs.size())
+            while ((fidx = fctr++) < int(funcs.size()))
                 funcs[fidx]();
-            //Log() << "Thread " << i << " ended " << std::endl;
         });
     }
     for (auto & thread : threads) {
