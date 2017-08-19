@@ -218,6 +218,7 @@ int main(void)
 }
 
 /* ---------------------- PLATFORM STUFF ------------------------*/
+#include <atomic>
 
 #if defined(OSX)
 #include <mach/mach_time.h>
@@ -233,28 +234,28 @@ double getTime()
 #include <windows.h>
 double getTime()
 {
-    static __int64 freq = 0;
-    static __int64 t0 = 0;
-    __int64 ct;
+    static std::atomic<__int64> freq(0), t0(0);
+    __int64 ct, zero(0);
 
     if (!freq) {
-        QueryPerformanceFrequency((LARGE_INTEGER *)&freq);
+	__int64 f;
+        QueryPerformanceFrequency((LARGE_INTEGER *)&f);
+	freq = f;
     }
     QueryPerformanceCounter((LARGE_INTEGER *)&ct);   // reads the current time (in system units)
-    if (!t0) {
-        t0 = ct;
-    }
+    t0.compare_exchange_strong(zero, ct, std::memory_order_release,  std::memory_order_relaxed);
     return double(ct-t0)/double(freq);
 }
 #elif defined(LINUX)
 #include <time.h>
 double getTime()
 {
-        static double t0 = -9999.;
+        static std::atomic<double> t0 (-9999.0);
+	double zero(-9999.0);
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
         double t = double(ts.tv_sec) + double(ts.tv_nsec)/1e9;
-        if (t0 < 0.) t0 = t;
+        t0.compare_exchange_strong(zero, t, std::memory_order_release,  std::memory_order_relaxed);
         return t-t0;
 }
 #else
